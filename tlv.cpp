@@ -25,7 +25,7 @@ std::vector<unsigned char> unhexify( const std::string &str )
 		int offset = flip_flap;
 		for( int i = 0; i < str.size(); i++ )
 		{
-			unsigned char ch = nibble[str[i]];
+			unsigned char ch = nibble[static_cast<unsigned char>(str[i])];
 			if ( !ch )
 			{
 				ret.clear();
@@ -734,7 +734,7 @@ std::list<Tlv> Tlv::parse_all( const unsigned char *data, const size_t size, Sta
 			// Build parsed root objects
 			for( auto &i : items )
 			{
-				ret.push_back( std::move( Tlv( i ) ) );
+				ret.push_back( Tlv( i ) );
 			}
 			// Pass parsed length to the caller
 			if ( len )
@@ -831,7 +831,6 @@ std::vector<unsigned char> Tlv::dump() const
 				build_items.push_back( std::make_pair( i.first, i.second ) );
 			} else {
 				build_items.push_back( std::make_pair( i.first, i.second ) );
-				auto it = i.second->children.rbegin();
 				for( auto it = i.second->children.rbegin(); it != i.second->children.rend(); ++it )
 				{
 					items.push( std::make_pair( i.first + 1, *it ) );
@@ -858,7 +857,7 @@ std::vector<unsigned char> Tlv::dump() const
 		} else {
 			// Definite long form
 			int len_bytes = 4 - __builtin_clz( len ) / 8;
-			out.push_back( (unsigned char)( 0x80 & len_bytes ) );
+			out.push_back( (unsigned char)( 0x80 | len_bytes ) );
 			for( int i = len_bytes - 1; i >= 0; i-- )
 			{
 				out.push_back( ( len >> ( i * 8 ) ) & 0xFF );
